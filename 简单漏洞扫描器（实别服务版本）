@@ -1,0 +1,44 @@
+import socket
+import os
+import sys
+def retBanner(ip, port):
+    try:
+        socket.setdefaulttimeout(2)
+        s = socket.socket()
+        s.connect((ip,port))
+        banner = s.recv(1024)
+        return banner
+    except:
+        return
+
+def checkVulns(banner, filename):
+    f = open(filename,'r')
+    for line in f.readlines():
+        if line.strip('\n') in banner:
+            print("[+] Server is vulnerable: " + banner.trip('\n'))
+def main():
+    if len(sys.argv) ==2:
+        filename = sys.argv[1]
+        if not os.path.isfile(filename):
+            print("[-] "+filename+' does not exist')
+            exit(0)
+        if not os.access(filename, os.R_OK):
+            print("[-] "+filename+' access denied.')
+            exit(0)
+    else:
+        print("[-] Usage: "+ str(sys.argv[0])+' <vuln filename>')
+        exit(0)
+    #定义要扫描的端口
+    portList = [21,22,25,80,110,135,139,443,445,5357]
+    #循环要扫描的ip
+    for x in range(1,255):
+        ip = str('192.168.1.'+str(x))
+        #循环扫描的端口
+        for port in portList:
+            banner = str(retBanner(ip, port))
+            if banner:
+                print("[+] "+ ip +":"+ str(port)+": "+banner)
+                checkVulns(banner, filename)
+if __name__ == '__main__':
+    main()
+
